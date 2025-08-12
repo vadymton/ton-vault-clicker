@@ -1,1 +1,6 @@
-
+{
+  "manifest_version": "1",
+  "name": "TON Vault Clicker",
+  "url": "https://vadymton.github.io/ton-vault-clicker/",
+  "icon_url": "https://vadymton.github.io/ton-vault-clicker/icon_v2.png"
+}
