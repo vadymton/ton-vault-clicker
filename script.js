@@ -1,32 +1,28 @@
-// Telegram WebApp (у браузері не заважає)
-const tg = window.Telegram?.WebApp;
-tg?.ready?.();
-tg?.expand?.();
+// Telegram Mini App
+const tg = window.Telegram.WebApp;
+tg.expand();
 
-// === TonConnect UI ===
-const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({
-  manifestUrl: "https://vadymton.github.io/ton-vault-clicker/tonconnect-manifest.json?v=17",
-  buttonRootId: "tc-root"
-});
+const user = tg?.initDataUnsafe?.user;
+document.getElementById("hello").innerText =
+  `Привіт, ${user?.first_name || "користувач"}!`;
 
-// Показуємо статус підключення
-const addrEl = document.getElementById('addr');
-const disconnectBtn = document.getElementById('disconnect'); // якщо є кнопка
+// Маніфест відносно поточного шляху (працює на GitHub Pages)
+const base = window.location.href.replace(/[^/]*$/, '');
+const manifestUrl = base + 'tonconnect-manifest.json';
 
-function renderStatus(wallet) {
-  const addr = wallet?.account?.address;
-  addrEl && (addrEl.textContent = addr ? `Підключено: ${addr}` : 'Гаманець не підключено');
-  if (disconnectBtn) disconnectBtn.style.display = addr ? '' : 'none';
-}
+// TON Connect UI
+const tonConnectUI = new TON_CONNECT_UI.TonConnectUI({ manifestUrl });
 
-tonConnectUI.onStatusChange(renderStatus);
+document.getElementById("connect-button").onclick = async () => {
+  try {
+    await tonConnectUI.connectWallet();
+    const w = tonConnectUI.wallet;
+    if (w && w.account) {
+      document.getElementById("wallet").innerText = "Адреса: " + w.account.address;
+    }
+  } catch (e) {
+    document.getElementById("wallet").innerText = "Скасовано або помилка підключення";
+  }
+};
 
-// (опц.) кнопка «Від’єднати»
-if (disconnectBtn) {
-  disconnectBtn.addEventListener('click', async () => {
-    try { await tonConnectUI.disconnect(); } finally { renderStatus(null); }
-  });
-}
-
-// Стартовий рендер
-renderStatus(tonConnectUI.wallet);
+document.getElementById("close-button").onclick = () => tg.close();
