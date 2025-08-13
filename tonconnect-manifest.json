@@ -1,6 +1,10 @@
 
 {
-  "name": "TON Vault Clicker",
+  "manifest_version": "1",
+  "name": "TON Vault WebApp",
   "url": "https://vadymton.github.io/ton-vault-clicker/",
-  "iconUrl": "https://vadymton.github.io/ton-vault-clicker/icon_v2.png"
+  "icon_url": "https://vadymton.github.io/ton-vault-clicker/icon_v2.png",
+  "terms_of_use_url": "__OPTIONAL__",
+  "privacy_policy_url": "__OPTIONAL__",
+  "webapp_bot_name": "TonMriyaBot"
 }
