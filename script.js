@@ -3,7 +3,7 @@ const tg = Telegram.WebApp;
 tg.ready();
 tg.expand();
 
-// ---- Купівля через Telegram Stars ----
+// Статус інвойсу
 function onInvoiceStatus(status, sku) {
   const el = document.getElementById("buy-status");
   if (!el) return;
@@ -13,6 +13,7 @@ function onInvoiceStatus(status, sku) {
   else                           el.innerText = "Очікуємо підтвердження…";
 }
 
+// Відкрити оплату Stars
 function openStarsInvoice({ sku, amount }) {
   const title =
     "TON Vault — " +
@@ -22,7 +23,7 @@ function openStarsInvoice({ sku, amount }) {
   const description = "Внутрішній товар у Mini App TON Vault";
   const payload = `vault_${sku}_${Date.now()}`;
 
-  // Спробуй показати алерт для діагностики кліку (можна прибрати після тесту)
+  // Діагностичний алерт (можна прибрати після тесту)
   // tg.showAlert(`Клік: ${title} на ${amount} ⭐`);
 
   tg.openInvoice(
@@ -30,16 +31,16 @@ function openStarsInvoice({ sku, amount }) {
       title,
       description,
       payload,
-      provider_token: "STARS",        // фікс для Telegram Stars
-      currency: "STARS",
-      prices: [{ label: title, amount }], // amount = кількість зірок
-      photo_url: location.origin + location.pathname + "icon_v2.png",
+      provider_token: "STARS",      // обов'язково для Telegram Stars у WebApp
+      currency: "STARS",            // валюта Stars у WebApp
+      prices: [{ label: title, amount }], // amount = кількість зірок (1000 = 1000⭐)
+      photo_url: location.origin + location.pathname + "icon_v2.png"
     },
     (status) => onInvoiceStatus(status, sku)
   );
 }
 
-// ---- Прив’язка кнопок (HTML повинен мати class="buy") ----
+// Прив’язка кліків
 document.querySelectorAll("button.buy").forEach((btn) => {
   btn.addEventListener("click", () => {
     const sku = btn.dataset.sku;
