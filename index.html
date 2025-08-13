@@ -1,45 +1,49 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TON Vault WebApp</title>
-  <link rel="icon" href="icon_v2.png">
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- Telegram Mini Apps API -->
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <!-- TonConnect UI (опційно; можна залишити) -->
-  <script src="https://unpkg.com/@tonconnect/ui@latest/dist/tonconnect-ui.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TON Vault Stars</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 20px;
+      background: #111;
+      color: #fff;
+    }
+    .card {
+      background: #1e1e1e;
+      padding: 16px;
+      border-radius: 8px;
+      max-width: 300px;
+      margin: auto;
+    }
+    button.buy {
+      padding: 10px;
+      background: #0088cc;
+      border: none;
+      border-radius: 5px;
+      color: #fff;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    button.buy:hover {
+      background: #0077b5;
+    }
+  </style>
 </head>
 <body>
-  <main class="container">
-    <h1>TON Vault</h1>
-    <p id="hello">Привіт!</p>
-
-    <!-- Підключення гаманця (опційно, для TON) -->
-    <div class="card">
-      <button id="connect-button">Підключити гаманець</button>
-      <p id="wallet"></p>
+  <div class="card">
+    <h3>Скрині за Stars</h3>
+    <div style="display:grid;gap:8px">
+      <button class="buy" data-sku="chest_small"  data-amount="1000">Мала скриня — 1 000 ⭐</button>
+      <button class="buy" data-sku="chest_medium" data-amount="3000">Середня скриня — 3 000 ⭐</button>
+      <button class="buy" data-sku="chest_big"    data-amount="10000">Велика скриня — 10 000 ⭐</button>
     </div>
+    <p id="buy-status" style="margin-top:8px;opacity:.9"></p>
+  </div>
 
-    <!-- ЄДИНИЙ блок покупок -->
-    <div class="card">
-      <h3>Скрині за Stars</h3>
-      <div style="display:grid;gap:8px">
-        <button class="buy" data-sku="chest_small"  data-amount="1000">Мала скриня — 1 000 ⭐</button>
-        <button class="buy" data-sku="chest_medium" data-amount="3000">Середня скриня — 3 000 ⭐</button>
-        <button class="buy" data-sku="chest_big"    data-amount="10000">Велика скриня — 10 000 ⭐</button>
-      </div>
-      <p id="buy-status" style="margin-top:8px;opacity:.9"></p>
-    </div>
-
-    <div class="card">
-      <button id="close-button">Закрити Mini App</button>
-    </div>
-  </main>
-
-  <!-- ТВОЙ JS -->
+  <!-- Підключення скрипта -->
   <script src="script.js"></script>
 </body>
 </html>
