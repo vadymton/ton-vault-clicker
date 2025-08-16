@@ -1,49 +1,95 @@
-<!DOCTYPE html>
+
+<!doctype html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TON Vault Stars</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TonMriyaBot — Скрині за Stars</title>
   <style>
-    body {
-      font-family: sans-serif;
-      padding: 20px;
-      background: #111;
-      color: #fff;
-    }
-    .card {
-      background: #1e1e1e;
-      padding: 16px;
-      border-radius: 8px;
-      max-width: 300px;
-      margin: auto;
-    }
-    button.buy {
-      padding: 10px;
-      background: #0088cc;
-      border: none;
-      border-radius: 5px;
-      color: #fff;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    button.buy:hover {
-      background: #0077b5;
-    }
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;color:#fff;background:#0f1318}
+    .wrap{max-width:720px;margin:0 auto;padding:24px}
+    h1{font-size:22px;margin:0 0 16px}
+    .btn{display:block;width:100%;padding:14px 16px;margin:12px 0;border:0;border-radius:10px;
+         background:#1da1f2;color:#fff;font-weight:700;font-size:18px;cursor:pointer}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+    .status{margin-top:12px;font-size:16px;min-height:1.4em}
   </style>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 </head>
 <body>
-  <div class="card">
-    <h3>Скрині за Stars</h3>
-    <div style="display:grid;gap:8px">
-      <button class="buy" data-sku="chest_small"  data-amount="1000">Мала скриня — 1 000 ⭐</button>
-      <button class="buy" data-sku="chest_medium" data-amount="3000">Середня скриня — 3 000 ⭐</button>
-      <button class="buy" data-sku="chest_big"    data-amount="10000">Велика скриня — 10 000 ⭐</button>
-    </div>
-    <p id="buy-status" style="margin-top:8px;opacity:.9"></p>
+  <div class="wrap">
+    <h1>Скрині за Stars</h1>
+
+    <!-- Кнопки з data-* атрибутами -->
+    <button class="btn buy" data-sku="small"  data-amount="1000">Мала скриня — 1 000 ⭐</button>
+    <button class="btn buy" data-sku="medium" data-amount="3000">Середня скриня — 3 000 ⭐</button>
+    <button class="btn buy" data-sku="big"    data-amount="10000">Велика скриня — 10 000 ⭐</button>
+
+    <div id="buy-status" class="status"></div>
   </div>
 
-  <!-- Підключення скрипта -->
-  <script src="script.js"></script>
+  <script>
+    // 1) Ініціалізація Telegram WebApp
+    const tg = window.Telegram.WebApp;
+    tg.ready();
+    tg.expand();
+
+    // 2) Налаштування
+    const API_URL = "https://YOUR_BACKEND_DOMAIN"; // ← ЗАМІНИ на свій бекенд (https!)
+
+    // 3) Допоміжні функції
+    const $status = document.getElementById("buy-status");
+    function setStatus(t){ $status.textContent = t || ""; }
+    function setLoading(on){
+      document.querySelectorAll(".buy").forEach(b => b.disabled = !!on);
+    }
+
+    // 4) Покупка за Stars
+    async function buyStars(sku, amountXTR){
+      try{
+        setLoading(true);
+        setStatus("Готуємо інвойс…");
+
+        const resp = await fetch(`${API_URL}/api/create-stars-invoice`, {
+          method: "POST",
+          headers: {"Content-Type":"application/json"},
+          body: JSON.stringify({
+            initData: tg.initData || tg.initDataUnsafe, // обов’язково!
+            sku,
+            amount: amountXTR // XTR (ціле число)
+          })
+        });
+
+        const data = await resp.json().catch(()=> ({}));
+        if(!resp.ok || !data?.invoice_link){
+          throw new Error(data?.error || "Сервер не повернув invoice_link");
+        }
+
+        // 5) Відкриваємо інвойс у Telegram
+        tg.openInvoice(data.invoice_link, (status) => {
+          if (status === "paid")       setStatus("✅ Оплачено!");
+          else if (status === "failed")    setStatus("❌ Помилка оплати");
+          else if (status === "cancelled") setStatus("🚫 Скасовано");
+          else                           setStatus("⏳ Очікуємо підтвердження…");
+        });
+
+      }catch(err){
+        console.error(err);
+        setStatus("❗ " + (err?.message || "Сталася помилка"));
+        tg.showPopup?.({title:"Помилка", message: String(err?.message || err)});
+      }finally{
+        setLoading(false);
+      }
+    }
+
+    // 6) Прив’язуємо клики до кнопок
+    document.querySelectorAll(".buy").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const sku = btn.dataset.sku;
+        const amount = parseInt(btn.dataset.amount, 10);
+        buyStars(sku, amount);
+      }, {passive:true});
+    });
+  </script>
 </body>
 </html>
