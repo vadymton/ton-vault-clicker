@@ -1,88 +1,41 @@
-
-<!doctype html>
+<!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>TonMriyaBot — Скрині за Stars</title>
-  <style>
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,"Helvetica Neue",Arial;color:#fff;background:#0f1318}
-    .wrap{max-width:720px;margin:0 auto;padding:24px}
-    h1{font-size:22px;margin:0 0 16px}
-    .btn{display:block;width:100%;padding:14px 16px;margin:12px 0;border:0;border-radius:10px;
-         background:#1da1f2;color:#fff;font-weight:700;font-size:18px;cursor:pointer}
-    .btn:disabled{opacity:.6;cursor:not-allowed}
-    .status{margin-top:12px;font-size:16px;min-height:1.4em}
-  </style>
+  <meta charset="UTF-8">
+  <title>TON Vault WebApp + TonConnect</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script type="module" src="script.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #121212;
+      color: white;
+      text-align: center;
+      padding: 20px;
+    }
+    button {
+      padding: 12px 20px;
+      margin: 10px;
+      background-color: #26a69a;
+      border: none;
+      color: white;
+      font-size: 16px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #2bbbad;
+    }
+  </style>
 </head>
 <body>
-  <div class="wrap">
-    <h1>Скрині за Stars</h1>
-
-    <button class="btn buy" data-sku="small"  data-amount="1000">Мала скриня — 1 000 ⭐</button>
-    <button class="btn buy" data-sku="medium" data-amount="3000">Середня скриня — 3 000 ⭐</button>
-    <button class="btn buy" data-sku="big"    data-amount="10000">Велика скриня — 10 000 ⭐</button>
-
-    <div id="buy-status" class="status"></div>
+  <h2>Привіт, <span id="user-name">користувач</span>!</h2>
+  <button id="connect-button">🔗 Підключити гаманець</button>
+  <p id="wallet-address"></p>
+  <div>
+    <button onclick="checkBalance()">💰 Переглянути баланс</button>
+    <button onclick="makeDeposit()">➕ Зробити депозит</button>
   </div>
-
-  <script>
-    // 🔹 Тут твій бекенд-URL
-    const API_URL = "https://ton-vault-backend.onrender.com";
-
-    // 1) Ініціалізація Telegram WebApp
-    const tg = window.Telegram.WebApp;
-    tg.ready();
-    tg.expand();
-
-    const $status = document.getElementById("buy-status");
-    function setStatus(t){ $status.textContent = t || ""; }
-    function setLoading(on){ document.querySelectorAll(".buy").forEach(b => b.disabled = !!on); }
-
-    // 2) Функція покупки
-    async function buyStars(sku, amountXTR){
-      try{
-        setLoading(true);
-        setStatus("Готуємо інвойс…");
-
-        const resp = await fetch(`${API_URL}/api/create-stars-invoice`, {
-          method: "POST",
-          headers: {"Content-Type":"application/json"},
-          body: JSON.stringify({
-            initData: tg.initData || tg.initDataUnsafe, // обов’язково
-            sku,
-            amount: amountXTR
-          })
-        });
-
-        const data = await resp.json().catch(()=> ({}));
-        if(!resp.ok || !data?.invoice_link) throw new Error(data?.error || "Немає invoice_link");
-
-        tg.openInvoice(data.invoice_link, (status) => {
-          if (status === "paid") setStatus("✅ Оплачено!");
-          else if (status === "failed") setStatus("❌ Помилка оплати");
-          else if (status === "cancelled") setStatus("🚫 Скасовано");
-          else setStatus("⏳ Очікуємо підтвердження…");
-        });
-
-      }catch(err){
-        console.error(err);
-        setStatus("❗ " + (err?.message || "Сталася помилка"));
-        tg.showPopup?.({title:"Помилка", message: String(err?.message || err)});
-      }finally{
-        setLoading(false);
-      }
-    }
-
-    // 3) Прив’язуємо кнопки
-    document.querySelectorAll(".buy").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const sku = btn.dataset.sku;
-        const amount = parseInt(btn.dataset.amount, 10);
-        buyStars(sku, amount);
-      });
-    });
-  </script>
+  <p id="balance-result"></p>
 </body>
 </html>
